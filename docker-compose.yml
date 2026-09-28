@@ -1,0 +1,122 @@
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: src/Gateway/Dockerfile
+      args:
+        PROJECT: src/Gateway/Gateway.csproj
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keys:/app/keys:ro
+      - gateway_logs:/app/logs
+    depends_on:
+      auth-service:
+        condition: service_started
+      users-service:
+        condition: service_started
+      products-service:
+        condition: service_started
+    restart: unless-stopped
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: src/AuthService/Dockerfile
+      args:
+        PROJECT: src/AuthService/AuthService.csproj
+    environment:
+      ConnectionStrings__AuthDb: Host=auth-db;Port=5432;Database=authdb;Username=postgres;Password=postgres
+      Services__Users: http://users-service:8080
+    volumes:
+      - ./keys:/app/keys:ro
+      - auth_logs:/app/logs
+    depends_on:
+      auth-db:
+        condition: service_healthy
+      users-service:
+        condition: service_started
+    restart: unless-stopped
+
+  users-service:
+    build:
+      context: .
+      dockerfile: src/UsersService/Dockerfile
+      args:
+        PROJECT: src/UsersService/UsersService.csproj
+    environment:
+      ConnectionStrings__UsersDb: Host=users-db;Port=5432;Database=usersdb;Username=postgres;Password=postgres
+    volumes:
+      - ./keys:/app/keys:ro
+      - users_logs:/app/logs
+    depends_on:
+      users-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  products-service:
+    build:
+      context: .
+      dockerfile: src/ProductsService/Dockerfile
+      args:
+        PROJECT: src/ProductsService/ProductsService.csproj
+    environment:
+      ConnectionStrings__ProductsDb: Host=products-db;Port=5432;Database=productsdb;Username=postgres;Password=postgres
+    volumes:
+      - ./keys:/app/keys:ro
+      - products_logs:/app/logs
+    depends_on:
+      products-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  auth-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: authdb
+    volumes:
+      - auth_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d authdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  users-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: usersdb
+    volumes:
+      - users_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d usersdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  products-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: productsdb
+    volumes:
+      - products_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d productsdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  auth_db:
+  users_db:
+  products_db:
+  gateway_logs:
+  auth_logs:
+  users_logs:
+  products_logs:

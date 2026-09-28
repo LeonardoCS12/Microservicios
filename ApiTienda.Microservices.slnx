@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ApiTienda.Common/ApiTienda.Common.csproj" />
+    <Project Path="src/AuthService/AuthService.csproj" />
+    <Project Path="src/Gateway/Gateway.csproj" />
+    <Project Path="src/ProductsService/ProductsService.csproj" />
+    <Project Path="src/UsersService/UsersService.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ApiTienda.Tests/ApiTienda.Tests.csproj" />
+    <Project Path="tests/ProductsService.Tests/ProductsService.Tests.csproj" />
+    <Project Path="tests/UsersService.Tests/UsersService.Tests.csproj" />
+  </Folder>
+</Solution>
