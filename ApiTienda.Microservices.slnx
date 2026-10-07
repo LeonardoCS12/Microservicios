@@ -3,6 +3,7 @@
     <Project Path="src/ApiTienda.Common/ApiTienda.Common.csproj" />
     <Project Path="src/AuthService/AuthService.csproj" />
     <Project Path="src/Gateway/Gateway.csproj" />
+    <Project Path="src/GraphqlBff/GraphqlBff.csproj" />
     <Project Path="src/ProductsService/ProductsService.csproj" />
     <Project Path="src/UsersService/UsersService.csproj" />
   </Folder>

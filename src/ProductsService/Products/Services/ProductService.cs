@@ -100,6 +100,7 @@ public class ProductService : IProductService
         var result = _productMapper.ToDTO(product);
 
         var respuestaDTO = new ProductoResponseDTO{
+            id = result.id,
             name = result.name,
             type = result.type,
             price = result.price,

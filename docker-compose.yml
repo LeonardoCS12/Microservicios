@@ -17,6 +17,8 @@ services:
         condition: service_started
       products-service:
         condition: service_started
+      graphql-bff:
+        condition: service_started
     restart: unless-stopped
 
   auth-service:
@@ -68,6 +70,19 @@ services:
     depends_on:
       products-db:
         condition: service_healthy
+    restart: unless-stopped
+
+  graphql-bff:
+    build:
+      context: .
+      dockerfile: src/GraphqlBff/Dockerfile
+      args:
+        PROJECT: src/GraphqlBff/GraphqlBff.csproj
+    environment:
+      Services__Products: http://products-service:8080/
+    depends_on:
+      products-service:
+        condition: service_started
     restart: unless-stopped
 
   auth-db:
