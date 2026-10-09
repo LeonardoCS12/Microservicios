@@ -9,14 +9,16 @@ namespace productos.Methods{
         bool? Status;
         bool? Is_delete;
         string? Type;
+        Guid? User_id;
 
         object[] valores = new object[7];
 
         string sentencia = "SELECT * FROM \"Products\" WHERE 1=1 ";
 
         // Primary Constructor
-        public SentenciaProductos(int? page, int? limit, string? sort, string? order, bool? status, bool? is_delete, string? type)
+        public SentenciaProductos(int? page, int? limit, string? sort, string? order, bool? status, bool? is_delete, string? type, Guid? user_id = null)
         {
+            User_id = user_id;
             Page = page;
             Limit = limit;
             Sort = sort;
@@ -49,6 +51,12 @@ namespace productos.Methods{
                 sentencia += " AND type = @type ";
                 parametros.Add("@type", Type);
                 valores[2] = Type;
+            }
+
+            if (User_id.HasValue)
+            {
+                sentencia += " AND user_id = @user_id ";
+                parametros.Add("@user_id", User_id);
             }
 
             //Verifiquemos que el orden no sea null ya que safeOrder tiene valor asc por defecto.

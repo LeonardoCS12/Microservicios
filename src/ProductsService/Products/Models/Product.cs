@@ -42,5 +42,8 @@ namespace productos.Models
 
         [MaxLength(200)]
         public string? image_lick { get; set; }
+
+        /// <summary>Id del usuario (sub del JWT) que creo el producto. Nulo en productos anteriores a la practica 9.</summary>
+        public Guid? user_id { get; set; }
     }
 }

@@ -38,4 +38,6 @@ public class ProductDTO{
     [MaxLength(200)]
     public string? image_link { get; set; }
 
+    public Guid? user_id { get; set; }
+
 }

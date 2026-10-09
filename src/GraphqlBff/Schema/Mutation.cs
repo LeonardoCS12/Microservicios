@@ -1,4 +1,5 @@
 using GraphqlBff.Clients;
+using HotChocolate;
 
 namespace GraphqlBff.Schema;
 
@@ -20,12 +21,6 @@ public class Mutation
     {
         var creado = await productsClient.CreateAsync(nombre, tipo, (decimal)precio, cancellationToken);
 
-        return new Producto
-        {
-            Id = creado.Id.ToString(),
-            Nombre = creado.Name,
-            Precio = (double)creado.Price,
-            Tipo = creado.Type
-        };
+        return creado.ToGraphQL();
     }
 }

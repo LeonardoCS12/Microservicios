@@ -29,7 +29,7 @@ public class ProductService : IProductService
     /// <summary>
     /// Obtiene todos los productos de la base de datos.
     /// </summary>
-    public async Task<IActionResult> GetAllProductsAsync(int? safePage,int? safeLimit,string? sort,string? safeOrder,bool? safeStatus,bool? safeIsdelete,string? type)
+    public async Task<IActionResult> GetAllProductsAsync(int? safePage,int? safeLimit,string? sort,string? safeOrder,bool? safeStatus,bool? safeIsdelete,string? type, Guid? user_id = null)
     {
 
         if(!safePage.HasValue && !safeLimit.HasValue && string.IsNullOrEmpty(sort) && string.IsNullOrEmpty(safeOrder) && !safeStatus.HasValue && !safeIsdelete.HasValue && string.IsNullOrEmpty(type))
@@ -38,7 +38,7 @@ public class ProductService : IProductService
         }
 
 
-        SentenciaProductos crearSentencia = new SentenciaProductos(safePage, safeLimit,sort,safeOrder,safeStatus,safeIsdelete,type);
+        SentenciaProductos crearSentencia = new SentenciaProductos(safePage, safeLimit,sort,safeOrder,safeStatus,safeIsdelete,type,user_id);
         var sentencia = crearSentencia.CrearSenentiaSQLProduct();
 
         var products = await _iProductDAO.GetProducts(sentencia.Sentencia,sentencia.Parametros);
@@ -94,6 +94,14 @@ public class ProductService : IProductService
 
         // Crear entidad usando el Mapper
         var product = _createProductoMapper.ToEntity(productDTO);
+
+        // Practica 9: el dueno del producto es el usuario del JWT (claim sub).
+        var ownerClaim = _ihttpContextAccessor.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            ?? _ihttpContextAccessor.HttpContext?.User?.FindFirst("sub")?.Value;
+        if (Guid.TryParse(ownerClaim, out var ownerId))
+        {
+            product.user_id = ownerId;
+        }
 
         await _iProductDAO.AddAsync(product);
 

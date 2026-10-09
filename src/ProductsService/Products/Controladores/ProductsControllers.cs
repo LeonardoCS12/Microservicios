@@ -22,7 +22,7 @@ public class productController : ControllerBase
     /// Obtiene los productos de la base de datos con parametros opcionales.
     /// </summary>
     [HttpGet("products")]
-    public async Task<IActionResult> GetAll2(int? page,int? limit,string? sort,string? order,bool? status,bool? is_deleted,string? type)
+    public async Task<IActionResult> GetAll2(int? page,int? limit,string? sort,string? order,bool? status,bool? is_deleted,string? type,Guid? user_id)
     {
         try{
 
@@ -60,7 +60,7 @@ public class productController : ControllerBase
             bool safeIsdelete = is_deleted ?? false;
             string safeOrder = order ?? "asc";*/
 
-            var result = await _iProductService.GetAllProductsAsync(page,limit,sort,order,status,is_deleted,type);
+            var result = await _iProductService.GetAllProductsAsync(page,limit,sort,order,status,is_deleted,type,user_id);
             return result;
 
         }catch(Exception ex){

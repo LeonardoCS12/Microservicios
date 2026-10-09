@@ -22,6 +22,13 @@ try
         })
         .AddHttpMessageHandler<BearerTokenHandler>();
 
+    // HU-05: cliente HTTP tipado hacia el microservicio de Usuarios.
+    builder.Services.AddHttpClient<UsersClient>(client =>
+        {
+            client.BaseAddress = new Uri(builder.Configuration["Services:Users"]!);
+        })
+        .AddHttpMessageHandler<BearerTokenHandler>();
+
     // HU-02: servidor GraphQL (el schema se genera a partir de las clases C#). HU-04: se agrega el tipo Mutation.
     builder.Services
         .AddGraphQLServer()

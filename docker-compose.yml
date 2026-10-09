@@ -80,8 +80,11 @@ services:
         PROJECT: src/GraphqlBff/GraphqlBff.csproj
     environment:
       Services__Products: http://products-service:8080/
+      Services__Users: http://users-service:8080/
     depends_on:
       products-service:
+        condition: service_started
+      users-service:
         condition: service_started
     restart: unless-stopped
 

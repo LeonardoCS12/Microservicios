@@ -1,4 +1,6 @@
 using GraphqlBff.Clients;
+using HotChocolate;
+using HotChocolate.Types;
 
 namespace GraphqlBff.Schema;
 
@@ -17,15 +19,27 @@ public class Query
         CancellationToken cancellationToken)
     {
         var productos = await productsClient.GetAllAsync(cancellationToken);
+        return productos.Select(p => p.ToGraphQL()).ToList();
+    }
 
-        return productos
-            .Select(p => new Producto
-            {
-                Id = p.Id.ToString(),
-                Nombre = p.Name,
-                Precio = (double)p.Price,
-                Tipo = p.Type
-            })
-            .ToList();
+    /// <summary>
+    /// HU-05: busca un usuario en el microservicio de Usuarios. Sus productos se resuelven
+    /// aparte (ver Usuario.GetProductosAsync) y solo si el cliente los pide.
+    /// </summary>
+    public async Task<Usuario?> GetUsuarioAsync(
+        [GraphQLType(typeof(NonNullType<IdType>))] string id,
+        [Service] UsersClient usersClient,
+        CancellationToken cancellationToken)
+    {
+        if (!Guid.TryParse(id, out var userId))
+        {
+            throw new GraphQLException(ErrorBuilder.New()
+                .SetMessage("El id del usuario debe ser un GUID valido.")
+                .SetCode("BAD_USER_INPUT")
+                .Build());
+        }
+
+        var usuario = await usersClient.GetByIdAsync(userId, cancellationToken);
+        return usuario?.ToGraphQL();
     }
 }

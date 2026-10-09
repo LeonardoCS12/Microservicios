@@ -1,3 +1,4 @@
+using HotChocolate;
 using HotChocolate.Types;
 
 namespace GraphqlBff.Schema;

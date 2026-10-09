@@ -19,9 +19,16 @@ public class ProductsClient
     }
 
     /// <summary>GET api/products</summary>
-    public async Task<IReadOnlyList<ProductDto>> GetAllAsync(CancellationToken cancellationToken)
+    public Task<IReadOnlyList<ProductDto>> GetAllAsync(CancellationToken cancellationToken) =>
+        GetListAsync("api/products", cancellationToken);
+
+    /// <summary>GET api/products?user_id={id} (HU-05): productos que creo un usuario.</summary>
+    public Task<IReadOnlyList<ProductDto>> GetByUserAsync(Guid userId, CancellationToken cancellationToken) =>
+        GetListAsync($"api/products?user_id={userId}", cancellationToken);
+
+    private async Task<IReadOnlyList<ProductDto>> GetListAsync(string url, CancellationToken cancellationToken)
     {
-        using var response = await _http.GetAsync("api/products", cancellationToken);
+        using var response = await _http.GetAsync(url, cancellationToken);
 
         // El microservicio responde 404 cuando no hay productos: para GraphQL eso es una lista vacia.
         if (response.StatusCode == HttpStatusCode.NotFound)

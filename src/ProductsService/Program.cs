@@ -54,6 +54,7 @@ try
     await DatabaseStartup.EnsureCreatedAsync<DataContextProduct>(app.Services, app.Logger);
     await DatabaseStartup.EnsureCreatedAsync<DataContext>(app.Services, app.Logger);
     await DatabaseStartup.EnsureAuditTableAsync<DataContext>(app.Services, app.Logger);
+    await DatabaseStartup.EnsureProductOwnerColumnAsync(app.Services, app.Logger);
 
     app.Run();
 }
@@ -88,6 +89,15 @@ public static class DatabaseStartup
                 await Task.Delay(TimeSpan.FromSeconds(3));
             }
         }
+    }
+
+    // Practica 9: EnsureCreated no modifica tablas existentes, asi que agregamos la columna si falta.
+    public static async Task EnsureProductOwnerColumnAsync(IServiceProvider services, Microsoft.Extensions.Logging.ILogger logger)
+    {
+        using var scope = services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<DataContextProduct>();
+        await db.Database.ExecuteSqlRawAsync("ALTER TABLE \"Products\" ADD COLUMN IF NOT EXISTS user_id uuid NULL;");
+        logger.LogInformation("Columna user_id de Products verificada.");
     }
 
     public static async Task EnsureAuditTableAsync<TContext>(IServiceProvider services, Microsoft.Extensions.Logging.ILogger logger)

@@ -24,3 +24,24 @@ public class ProductDto
     public decimal Price { get; set; }
     public bool Status { get; set; }
 }
+
+/// <summary>
+/// Subconjunto de campos del usuario que el BFF necesita. Se omiten a proposito
+/// password y demas datos sensibles: lo que no se lee, no se puede filtrar por GraphQL.
+/// </summary>
+public class UserDto
+{
+    public Guid Id { get; set; }
+
+    [System.Text.Json.Serialization.JsonPropertyName("username")]
+    public string Username { get; set; } = string.Empty;
+
+    [System.Text.Json.Serialization.JsonPropertyName("email")]
+    public string? Email { get; set; }
+
+    [System.Text.Json.Serialization.JsonPropertyName("first_name")]
+    public string FirstName { get; set; } = string.Empty;
+
+    [System.Text.Json.Serialization.JsonPropertyName("last_name")]
+    public string LastName { get; set; } = string.Empty;
+}

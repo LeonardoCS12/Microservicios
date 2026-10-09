@@ -22,7 +22,8 @@ public class ProductMapper
             status = product.status,
             text = product.text,
             Product_key = product.Product_key,
-            image_link = product.image_lick
+            image_link = product.image_lick,
+            user_id = product.user_id
         };
     }
 
