@@ -16,14 +16,14 @@ try
     builder.Services.AddTransient<BearerTokenHandler>();
 
     // HU-03: cliente HTTP tipado hacia el microservicio de Productos.
-    builder.Services.AddHttpClient<ProductsClient>(client =>
+    builder.Services.AddHttpClient<IProductsClient, ProductsClient>(client =>
         {
             client.BaseAddress = new Uri(builder.Configuration["Services:Products"]!);
         })
         .AddHttpMessageHandler<BearerTokenHandler>();
 
     // HU-05: cliente HTTP tipado hacia el microservicio de Usuarios.
-    builder.Services.AddHttpClient<UsersClient>(client =>
+    builder.Services.AddHttpClient<IUsersClient, UsersClient>(client =>
         {
             client.BaseAddress = new Uri(builder.Configuration["Services:Users"]!);
         })

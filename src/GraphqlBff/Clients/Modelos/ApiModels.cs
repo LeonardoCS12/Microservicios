@@ -1,7 +1,9 @@
+using System.Text.Json.Serialization;
+
 namespace GraphqlBff.Clients;
 
-// Modelos para leer las respuestas JSON del microservicio de Productos.
-// Reflejan el formato que ya devuelve la API REST: { codigo, mensaje, resultado }.
+// Moldes para leer las respuestas JSON de los microservicios.
+// Reflejan el formato que ya devuelven las APIs REST: { codigo, mensaje, resultado }.
 
 public class ApiResponse<T>
 {
@@ -10,10 +12,18 @@ public class ApiResponse<T>
     public T? Resultado { get; set; }
 }
 
+/// <summary>GET /api/products devuelve { total, products: [...] }.</summary>
 public class ProductsPage
 {
     public int Total { get; set; }
     public List<ProductDto> Products { get; set; } = new();
+}
+
+/// <summary>GET /api/users devuelve { total, users: [...] }.</summary>
+public class UsersPage
+{
+    public int Total { get; set; }
+    public List<UserDto> Users { get; set; } = new();
 }
 
 public class ProductDto
@@ -23,6 +33,18 @@ public class ProductDto
     public string Type { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public bool Status { get; set; }
+
+    [JsonPropertyName("text")]
+    public string? Text { get; set; }
+
+    [JsonPropertyName("product_key")]
+    public string? ProductKey { get; set; }
+
+    [JsonPropertyName("image_link")]
+    public string? ImageLink { get; set; }
+
+    [JsonPropertyName("created_at")]
+    public DateTimeOffset CreatedAt { get; set; }
 }
 
 /// <summary>
@@ -33,15 +55,15 @@ public class UserDto
 {
     public Guid Id { get; set; }
 
-    [System.Text.Json.Serialization.JsonPropertyName("username")]
+    [JsonPropertyName("username")]
     public string Username { get; set; } = string.Empty;
 
-    [System.Text.Json.Serialization.JsonPropertyName("email")]
+    [JsonPropertyName("email")]
     public string? Email { get; set; }
 
-    [System.Text.Json.Serialization.JsonPropertyName("first_name")]
+    [JsonPropertyName("first_name")]
     public string FirstName { get; set; } = string.Empty;
 
-    [System.Text.Json.Serialization.JsonPropertyName("last_name")]
+    [JsonPropertyName("last_name")]
     public string LastName { get; set; } = string.Empty;
 }
