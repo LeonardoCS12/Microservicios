@@ -9,7 +9,7 @@ public interface IProductService
     /// Obtiene todos los productos.
     /// </summary>
     /// <returns>Lista de productos en formato DTO.</returns>
-    Task<IActionResult> GetAllProductsAsync(int? page,int? limit,string? sort, string? order,bool? status,bool? is_delete,string? type, Guid? user_id = null);
+    Task<IActionResult> GetAllProductsAsync(int? page,int? limit,string? sort, string? order,bool? status,bool? is_delete,string? type);
 
     /// <summary>
     /// Obtiene un producto por su ID.

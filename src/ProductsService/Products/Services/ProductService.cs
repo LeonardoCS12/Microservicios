@@ -16,9 +16,11 @@ public class ProductService : IProductService
     private readonly CreateProductMapper _createProductoMapper;
     private readonly DataContext _context;
     private readonly IHttpContextAccessor _ihttpContextAccessor;
+    private readonly IProductNotifier? _notifier;
 
-    public ProductService(IHttpContextAccessor contextAccessor, DataContext context, IProductDAO iProductDAO, ProductMapper productMapper, CreateProductMapper createProductoMapper)
+    public ProductService(IHttpContextAccessor contextAccessor, DataContext context, IProductDAO iProductDAO, ProductMapper productMapper, CreateProductMapper createProductoMapper, IProductNotifier? notifier = null)
     {
+        _notifier = notifier;
         _iProductDAO = iProductDAO;
         _productMapper = productMapper;
         _createProductoMapper = createProductoMapper;
@@ -26,10 +28,14 @@ public class ProductService : IProductService
         _ihttpContextAccessor = contextAccessor;
     }
 
+    // Pide a Notificaciones difundir el evento (el dominio de Productos decide cuando notificar).
+    private Task NotificarAsync(string evento, Product product) =>
+        _notifier?.NotifyAsync(evento, new { id = product.id, nombre = product.name, precio = product.price }) ?? Task.CompletedTask;
+
     /// <summary>
     /// Obtiene todos los productos de la base de datos.
     /// </summary>
-    public async Task<IActionResult> GetAllProductsAsync(int? safePage,int? safeLimit,string? sort,string? safeOrder,bool? safeStatus,bool? safeIsdelete,string? type, Guid? user_id = null)
+    public async Task<IActionResult> GetAllProductsAsync(int? safePage,int? safeLimit,string? sort,string? safeOrder,bool? safeStatus,bool? safeIsdelete,string? type)
     {
 
         if(!safePage.HasValue && !safeLimit.HasValue && string.IsNullOrEmpty(sort) && string.IsNullOrEmpty(safeOrder) && !safeStatus.HasValue && !safeIsdelete.HasValue && string.IsNullOrEmpty(type))
@@ -38,7 +44,7 @@ public class ProductService : IProductService
         }
 
 
-        SentenciaProductos crearSentencia = new SentenciaProductos(safePage, safeLimit,sort,safeOrder,safeStatus,safeIsdelete,type,user_id);
+        SentenciaProductos crearSentencia = new SentenciaProductos(safePage, safeLimit,sort,safeOrder,safeStatus,safeIsdelete,type);
         var sentencia = crearSentencia.CrearSenentiaSQLProduct();
 
         var products = await _iProductDAO.GetProducts(sentencia.Sentencia,sentencia.Parametros);
@@ -95,20 +101,11 @@ public class ProductService : IProductService
         // Crear entidad usando el Mapper
         var product = _createProductoMapper.ToEntity(productDTO);
 
-        // Practica 9: el dueno del producto es el usuario del JWT (claim sub).
-        var ownerClaim = _ihttpContextAccessor.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
-            ?? _ihttpContextAccessor.HttpContext?.User?.FindFirst("sub")?.Value;
-        if (Guid.TryParse(ownerClaim, out var ownerId))
-        {
-            product.user_id = ownerId;
-        }
-
         await _iProductDAO.AddAsync(product);
 
         var result = _productMapper.ToDTO(product);
 
         var respuestaDTO = new ProductoResponseDTO{
-            id = result.id,
             name = result.name,
             type = result.type,
             price = result.price,
@@ -130,6 +127,8 @@ public class ProductService : IProductService
 
         _context.Auditorias.Add(log);
         await _context.SaveChangesAsync();
+
+        await NotificarAsync("producto_creado", product);
 
         return new OkObjectResult(new ApiResponse<ProductoResponseDTO>(200,MessageService.Instance.GetMessage("Productoscreate200"),respuestaDTO));
     }
@@ -183,6 +182,8 @@ public class ProductService : IProductService
 
         _context.Auditorias.Add(log);
         await _context.SaveChangesAsync();
+
+        await NotificarAsync("producto_actualizado", product);
 
         return new OkObjectResult(new ApiResponse<string>(200,MessageService.Instance.GetMessage("ProductUpdate200"))); // Producto actualizado correctamente
     }
@@ -250,6 +251,8 @@ public class ProductService : IProductService
         {
             Console.WriteLine($"Error al registrar auditoría en Patch: {ex.Message}");
         }
+
+        await NotificarAsync("producto_actualizado", product);
 
         return new OkObjectResult(new ApiResponse<string>(200, MessageService.Instance.GetMessage("ProductPartialUpdate200")));
     }
